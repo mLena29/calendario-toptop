@@ -682,6 +682,19 @@
   /* ================= APP ================= */
   .install-btn{background:var(--sun) !important}
   .install-btn[hidden]{display:none !important}
+  .install-btn .short{display:none}
+  @media (max-width:700px){ .install-btn .full{display:none} .install-btn .short{display:inline} }
+  .ins-back{position:fixed;inset:0;z-index:100;background:rgba(31,31,36,.55);display:none;align-items:center;justify-content:center;padding:16px}
+  .ins-back.open{display:flex}
+  .ins-box{background:#fff;border:2px solid var(--ink);border-radius:16px;box-shadow:6px 6px 0 var(--ink);width:min(420px,100%);max-height:90vh;overflow:auto;padding:18px 20px 20px}
+  .ins-box h3{font-family:var(--hand);font-size:32px;line-height:1;margin-bottom:6px}
+  .ins-box p{font-size:17px;color:var(--ink-soft);margin-bottom:10px}
+  .ins-box ol{margin:0 0 12px 22px;font-size:18px;display:flex;flex-direction:column;gap:6px}
+  .ins-box .ins-sec{border:2px dashed var(--grid);border-radius:12px;padding:10px 12px;margin-bottom:10px}
+  .ins-box .ins-sec.me{border-color:var(--ink);background:var(--sun-soft)}
+  .ins-box .ins-sec b{font-family:var(--hand);font-size:24px;display:block;margin-bottom:2px}
+  .ins-box .ins-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:6px}
+  .ins-box .primary{padding:8px 16px}
   .topbar{padding-top:env(safe-area-inset-top);height:calc(64px + env(safe-area-inset-top))}
   body{grid-template-rows:calc(64px + env(safe-area-inset-top)) 1fr}
 
@@ -689,7 +702,8 @@
     body{grid-template-columns:1fr;grid-template-rows:calc(60px + env(safe-area-inset-top)) 1fr;padding-bottom:calc(72px + env(safe-area-inset-bottom))}
     main{grid-column:1 !important}
     .topbar{padding-left:12px;padding-right:12px}
-    .brand{font-size:28px;gap:8px}
+    .brand{font-size:24px;gap:6px;white-space:nowrap}
+    .install-btn{padding:0 10px;font-size:16px}
     .brand-mark{width:32px;height:32px;font-size:20px}
     .top-actions{gap:8px}
     .avatar{display:none}
@@ -727,7 +741,7 @@
     </div> Meu Quadro
   </div>
   <div class="top-actions">
-    <button class="theme-btn install-btn" id="installBtn" type="button" hidden>Instalar app</button>
+    <button class="theme-btn install-btn" id="installBtn" type="button"><span class="full">Instalar app</span><span class="short">Instalar</span></button>
     <div class="theme-wrap">
       <button class="theme-btn" id="themeBtn" aria-haspopup="true" aria-expanded="false">
         <span class="dots" id="themeDots"></span><span id="themeLabel">Tema</span>
@@ -870,6 +884,17 @@
   </section>
 </main>
 
+<div class="ins-back" id="insBack" role="dialog" aria-modal="true" aria-labelledby="insTitle">
+  <div class="ins-box">
+    <h3 id="insTitle">Instalar o Meu Quadro</h3>
+    <p id="insLead">Escolha o seu aparelho:</p>
+    <div class="ins-sec" id="insAndroid"><b>Android (Chrome)</b><ol><li>Toque nos três pontinhos no canto de cima</li><li>Toque em <strong>Instalar app</strong> (ou <strong>Adicionar à tela inicial</strong>)</li></ol></div>
+    <div class="ins-sec" id="insIos"><b>iPhone / iPad (Safari)</b><ol><li>Toque no botão <strong>Compartilhar</strong> (quadrado com seta para cima)</li><li>Role e toque em <strong>Adicionar à Tela de Início</strong></li></ol></div>
+    <div class="ins-sec" id="insDesk"><b>Computador (Chrome ou Edge)</b><ol><li>Olhe o lado direito da barra de endereço</li><li>Clique no ícone de <strong>instalar</strong> (um monitor com seta)</li></ol></div>
+    <p style="font-size:15px">O botão só instala direto em alguns navegadores. Se não aparecer nada, abra este endereço no Chrome (Android/computador) ou no Safari (iPhone).</p>
+    <div class="ins-actions"><button class="primary" id="insClose" type="button">Entendi</button></div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 <div class="snow" id="snow" aria-hidden="true"></div>
 
@@ -1615,7 +1640,7 @@
   $('taskFilter').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { taskFilter = b.dataset.f; syncFilter(); renderTasksScreen(); }));
   document.querySelectorAll('.side-btn').forEach(b => b.addEventListener('click', () => {
     if(b.dataset.screen) setScreen(b.dataset.screen);
-    else toast('em breve');
+    else openInstallHelp();
   }));
 
   // ================= FIGURINHAS (mini imagens nos dias) =================
@@ -1897,6 +1922,15 @@
 </script>
 <script>
 // ===== app instalável: modo offline e botão "Instalar app" =====
+function openInstallHelp(){
+  const ua = navigator.userAgent;
+  const ios = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const android = /android/i.test(ua);
+  const mine = ios ? 'insIos' : android ? 'insAndroid' : 'insDesk';
+  ['insAndroid','insIos','insDesk'].forEach(id => document.getElementById(id).classList.toggle('me', id === mine));
+  document.getElementById('insLead').textContent = 'Para o seu aparelho, siga o quadro destacado:';
+  document.getElementById('insBack').classList.add('open');
+}
 (() => {
   if('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')){
     window.addEventListener('load', () => {
@@ -1906,26 +1940,26 @@
     });
   }
   const btn = document.getElementById('installBtn');
+  const back = document.getElementById('insBack');
   const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   let deferred = null;
-  window.addEventListener('beforeinstallprompt', e => {
-    e.preventDefault(); deferred = e;
-    if(!standalone) btn.hidden = false;
-  });
+  // o botão fica sempre visível (some só dentro do app já instalado)
+  if(standalone) btn.hidden = true;
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferred = e; });
   btn.addEventListener('click', async () => {
     if(deferred){
       deferred.prompt();
-      await deferred.userChoice;
-      deferred = null; btn.hidden = true;
+      const r = await deferred.userChoice;
+      deferred = null;
+      if(r && r.outcome === 'accepted') btn.hidden = true;
     } else {
-      alert('No iPhone/iPad: toque em Compartilhar e depois em "Adicionar à Tela de Início".');
+      openInstallHelp();
     }
   });
+  document.getElementById('insClose').addEventListener('click', () => back.classList.remove('open'));
+  back.addEventListener('click', e => { if(e.target === back) back.classList.remove('open'); });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') back.classList.remove('open'); });
   window.addEventListener('appinstalled', () => { btn.hidden = true; });
-  // iPhone/iPad não avisam quando dá para instalar: mostra o botão com a dica
-  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if(ios && !standalone) btn.hidden = false;
-  // atalho "Tarefas" do ícone do app
   if(location.hash === '#tarefas'){
     const t = document.querySelector('.side-btn[data-screen=tasks]');
     if(t) t.click();

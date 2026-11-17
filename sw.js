@@ -1,6 +1,6 @@
 // Meu Quadro - service worker: deixa o app abrir sem internet.
 // Ao publicar uma versão nova, aumente o número abaixo para os aparelhos baixarem a atualização.
-const VERSION = 'meu-quadro-v1';
+const VERSION = 'meu-quadro-v2';
 const CORE = [
   './',
   './index.html',
