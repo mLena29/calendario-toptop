@@ -1,0 +1,22 @@
+{
+  "name": "Meu Quadro - Calendário",
+  "short_name": "Meu Quadro",
+  "description": "Calendário pessoal com lembretes, tarefas, figurinhas e atividades especiais.",
+  "lang": "pt-BR",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fbfaf6",
+  "theme_color": "#ffffff",
+  "categories": ["productivity", "lifestyle"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Tarefas", "url": "./#tarefas", "icons": [{ "src": "icon-192.png", "sizes": "192x192" }] }
+  ]
+}
